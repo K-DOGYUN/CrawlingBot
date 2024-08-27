@@ -1,6 +1,45 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>CrawlingBot</groupId>
-  <artifactId>CrawlingBot</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>CrawlingBot</groupId>
+	<artifactId>CrawlingBot</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+  
+	<dependencies>
+	    <!-- JDA dependency -->
+	    <dependency>
+	        <groupId>net.dv8tion</groupId>
+	        <artifactId>JDA</artifactId>
+	        <version>5.0.0-beta.23</version> <!-- Use the latest stable or beta version -->
+	    </dependency>
+	
+	    <!-- Required dependencies for JDA -->
+	    <!-- Dependency for JDA's WebSocket support -->
+	    <dependency>
+	        <groupId>com.neovisionaries</groupId>
+	        <artifactId>nv-websocket-client</artifactId>
+	        <version>2.14</version> <!-- Ensure this is the latest version -->
+	    </dependency>
+	    
+	    <!-- Lombok dependency -->
+	    <dependency>
+	        <groupId>org.projectlombok</groupId>
+	        <artifactId>lombok</artifactId>
+	        <version>1.18.26</version> <!-- Use the latest stable version -->
+	        <scope>provided</scope>
+	    </dependency>
+	    
+	    <!-- SLF4J API -->
+	    <dependency>
+	        <groupId>org.slf4j</groupId>
+	        <artifactId>slf4j-api</artifactId>
+	        <version>2.0.0</version> <!-- Use the latest stable version -->
+	    </dependency>
+	
+	    <!-- Logback Classic as SLF4J implementation -->
+	    <dependency>
+	        <groupId>ch.qos.logback</groupId>
+	        <artifactId>logback-classic</artifactId>
+	        <version>1.4.7</version> <!-- Use the latest stable version -->
+	    </dependency>
+	</dependencies>
 </project>
