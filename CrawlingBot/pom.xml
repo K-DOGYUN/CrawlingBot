@@ -55,5 +55,19 @@
 	        <artifactId>commons-codec</artifactId>
 	        <version>1.16.0</version> <!-- Use the latest stable version -->
 	    </dependency>
+	    
+	    <!-- privateItems -->
+	    <dependency>
+			<groupId>PrivateItems</groupId>
+			<artifactId>PrivateItems</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+	    </dependency>
+	    
+	    <!-- jackson -->
+	    <dependency>
+	        <groupId>com.fasterxml.jackson.core</groupId>
+	        <artifactId>jackson-databind</artifactId>
+	        <version>2.15.2</version> <!-- Use the latest stable version -->
+	    </dependency>
 	</dependencies>
 </project>
