@@ -50,11 +50,11 @@ public class DiscordBot extends ListenerAdapter{
 			guildInfo.setId(guild.getId());
 			guildInfo.setName(guild.getName());
 			
-			ChannelDto channelInfo = new ChannelDto();
 
 			guild.getTextChannels().forEach(textChannel -> {
 				log.info("============<> textChannel: {}", textChannel.getName());
 				
+				ChannelDto channelInfo = new ChannelDto();
 				channelInfo.setId(textChannel.getId());
 				channelInfo.setName(textChannel.getName());
 				guildInfo.getChannels().add(channelInfo);
