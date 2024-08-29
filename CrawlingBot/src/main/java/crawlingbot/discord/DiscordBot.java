@@ -1,5 +1,10 @@
 package crawlingbot.discord;
 
+
+
+import org.apache.commons.codec.binary.Base64;
+
+import crawlingbot.util.PropertyUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -9,7 +14,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 
 @Slf4j
 public class DiscordBot extends ListenerAdapter{
-	private static String botToken = "MTIzMzc4MzU2NTMwMTU4Mzg4Mg.GKinrU.RzV0XgRu9DBj-6PcpXjLm73uY_vZt0qjo3GvOU";
+	private static String botToken = new String(Base64.decodeBase64(PropertyUtil.getProps("discord.botToken")));
 	
 	public void buildingBot() {
 		JDABuilder

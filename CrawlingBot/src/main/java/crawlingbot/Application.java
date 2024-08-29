@@ -8,5 +8,4 @@ public class Application {
 		DiscordBot discordBot = new DiscordBot();
 		discordBot.buildingBot();
 	}
-
 }

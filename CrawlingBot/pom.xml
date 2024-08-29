@@ -41,5 +41,19 @@
 	        <artifactId>logback-classic</artifactId>
 	        <version>1.4.7</version> <!-- Use the latest stable version -->
 	    </dependency>
+	    
+	    <!-- Apache Commons Lang 3 -->
+	    <dependency>
+	        <groupId>org.apache.commons</groupId>
+	        <artifactId>commons-lang3</artifactId>
+	        <version>3.12.0</version> <!-- Use the latest stable version -->
+	    </dependency>
+	    
+	    <!-- Apache Commons Codec -->
+	    <dependency>
+	        <groupId>commons-codec</groupId>
+	        <artifactId>commons-codec</artifactId>
+	        <version>1.16.0</version> <!-- Use the latest stable version -->
+	    </dependency>
 	</dependencies>
 </project>
