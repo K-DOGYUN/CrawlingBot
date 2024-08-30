@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!-- Define the pattern for colored output -->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <immediateFlush>true</immediateFlush>
+    </appender>
+    
+    <appender name="CONSOLE_ERROR" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!-- Define the pattern for colored output -->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %red(%level) %logger{36} - %msg%n</pattern>
+        </encoder>
+        <!-- Filter to allow only ERROR level logs -->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <immediateFlush>true</immediateFlush>
+    </appender>
+	
+	<logger name="crawlingbot" level="DEBUG"/>
+    <!-- Set the root logger level and appenders -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+</configuration>
