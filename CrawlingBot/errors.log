@@ -1,0 +1,2 @@
+2024-09-02 13:30:13 [JDA MainWS-ReadThread] ERROR crawlingbot.discord.DiscordBot - ====<> READ CRAWLING DATA FAILED!
+2024-09-02 13:30:13 [JDA MainWS-ReadThread] ERROR crawlingbot.discord.DiscordBot - java.io.FileNotFoundException: src\main\resources\guidls.json (지정된 파일을 찾을 수 없습니다)

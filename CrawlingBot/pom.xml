@@ -4,6 +4,21 @@
 	<artifactId>CrawlingBot</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
   
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version> <!-- Use a suitable version -->
+                <configuration>
+                    <!-- Specify the source and target Java version -->
+                    <source>17</source> <!-- Replace with the desired version -->
+                    <target>17</target> <!-- Replace with the desired version -->
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+  
 	<dependencies>
 	    <!-- JDA dependency -->
 	    <dependency>
@@ -42,11 +57,11 @@
 	        <version>1.4.6</version> <!-- Use the latest version -->
 	    </dependency>
 	
-	    <!-- Logback Classic Dependency -->
+		<!-- Logback Classic Dependency -->
 	    <dependency>
 	        <groupId>ch.qos.logback</groupId>
 	        <artifactId>logback-classic</artifactId>
-	        <version>1.4.6</version> <!-- Use the latest version -->
+	        <version>1.4.6</version> <!-- Use the latest version --> 
 	    </dependency>
 	    
 	    <!-- Apache Commons Lang 3 -->
