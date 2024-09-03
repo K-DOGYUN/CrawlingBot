@@ -8,12 +8,11 @@ import java.util.List;
 import org.apache.commons.codec.binary.Base64;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
-import crawlingbot.discord.commands.BotCommandsUtil;
-import crawlingbot.discord.domain.ChannelDto;
+import crawlingbot.discord.commands.BotSlashCommand;
 import crawlingbot.discord.domain.GuildDto;
 import crawlingbot.util.PropertyUtil;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -21,36 +20,37 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
 @Slf4j
 public class DiscordBot extends ListenerAdapter {
 	private static String botToken = new String(Base64.decodeBase64(PropertyUtil.getProps("discord.botToken")));
 
-	private static List<GuildDto> accessGuilds = new ArrayList<>();
+	private static List<GuildDto> accessGuildsInformation = new ArrayList<>();
+	
+	public static List<GuildDto> getGuildsInformation() {
+		return accessGuildsInformation;
+	}
 
 	public void buildingBot() {
 		JDABuilder builder = JDABuilder.createDefault(botToken, GatewayIntent.GUILD_MESSAGES,
 				GatewayIntent.MESSAGE_CONTENT);
-
+		builder.disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOJI, CacheFlag.STICKER, CacheFlag.SCHEDULED_EVENTS);
 		builder.addEventListeners(new DiscordBot()).build();
-
 	}
 
-	/**
-	 * 봇 실행시에 호출
-	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public void onReady(ReadyEvent event) {
 		log.info("====<> BOT READY");
-		/* slash commands initialization */
-		BotCommandsUtil botCommands = new BotCommandsUtil();
+		/* Slash Command Initialization */
+		BotSlashCommand botCommands = new BotSlashCommand();
 		botCommands.initCommands(event.getJDA().updateCommands());
-		/* slash commands initialization */
+		/* Slash Command Initialization */
 		
 		ObjectMapper mapper = new ObjectMapper();
 		try {
-			accessGuilds = mapper.readValue(new File("src/main/resources/guidls.json"), List.class);
+			accessGuildsInformation = mapper.readValue(new File("src/main/resources/guidls.json"), List.class);
 			log.info("====<> READ CRAWLING DATA SUCCESS");
 		} catch (IOException e) {
 			log.error("====<> READ CRAWLING DATA FAILED!");
@@ -106,18 +106,7 @@ public class DiscordBot extends ListenerAdapter {
 
 	@Override
 	public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-		event.getCommandType();
-		event.getName();
-		event.getSubcommandName();
-		event.getOption("option1");
-		switch (event.getName()) {
-		case "help":
-			event.reply("now help command testing").queue();
-			break;
-
-		default:
-			break;
-		}
+		BotSlashCommand command = new BotSlashCommand();
+		command.slashCommandAction(event);
 	}
-
 }
