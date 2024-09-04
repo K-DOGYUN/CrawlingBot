@@ -1,11 +1,13 @@
 package crawlingbot.discord.domain;
 
+
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class GuildDto {
-	private String guildId;
-	private String guildName;
+public class WebpageUrlDto {
+	private String url;
+	private String channelId;
+	private String imgYn;
 }

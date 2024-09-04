@@ -70,13 +70,11 @@ public class BotSlashCommand {
 				Guild guild = event.getGuild();
 				MessageChannelUnion channel = event.getChannel();
 				
-				
-				
-				if (DiscordBot.getGuildsInformation().stream().anyMatch(guild -> )) {
-					
-				} else {
-					
-				}
+//				if (DiscordBot.getGuildsInformation().stream().anyMatch(guild -> )) {
+//					
+//				} else {
+//					
+//				}
 				break;
 				
 			default:
