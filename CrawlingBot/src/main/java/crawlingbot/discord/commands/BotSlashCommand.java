@@ -4,12 +4,15 @@ import java.nio.channels.Channel;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.ObjectUtils;
+
 import crawlingbot.discord.DiscordBot;
 import crawlingbot.discord.domain.GuildDto;
 import lombok.Getter;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
@@ -41,9 +44,15 @@ public class BotSlashCommand {
 			SlashCommandData commandData = Commands.slash(bc.getName(), bc.getDescription());
 			
 			for (BotSubCommands bsc : bc.getSubCommandList()) {
-				commandData.addSubcommands(
-						new SubcommandData(bsc.getName(), bc.getDescription() + "-" + bsc.getDescription())
-						);
+				SubcommandData subcommandData = new SubcommandData(bsc.getName(), bc.getDescription() + "-" + bsc.getDescription());
+				
+				if (!ObjectUtils.isEmpty(bsc.getOptionList())) {
+					for (BotOptions op : bsc.getOptionList()) {
+						subcommandData.addOption(OptionType.STRING, op.getName(), op.getDescription());
+					}
+				}
+				
+				commandData.addSubcommands(subcommandData);
 			}
 			
 			commands.addCommands(commandData);
@@ -64,7 +73,6 @@ public class BotSlashCommand {
 	}
 	
 	private void CrawlingAction(SlashCommandInteractionEvent event) {
-		
 		switch (event.getSubcommandName()) {
 			case "tu":
 				Guild guild = event.getGuild();
@@ -85,7 +93,7 @@ public class BotSlashCommand {
 	
 	@Getter
 	public static enum BotCommands {
-		CRAWLING("cw", "Crawling setting", Arrays.asList(BotSubCommands.TARGET_URL, BotSubCommands.IMAGE_PERMISSION));
+		CRAWLING("cw", "Crawling setting", Arrays.asList(BotSubCommands.TARGET_WEBPAGE, BotSubCommands.IMAGE_PERMISSION));
 		
 		private final String name;
 		private final String description;
@@ -100,21 +108,23 @@ public class BotSlashCommand {
 	
 	@Getter
 	public enum BotSubCommands {
-		TARGET_URL("tu", "Target url"),
-		IMAGE_PERMISSION("ip", "Image permission");
+		TARGET_WEBPAGE("wb", "Target Webpage", Arrays.asList(BotOptions.URL)),
+		IMAGE_PERMISSION("ip", "Image permission", null);
 		
 		private final String name;
 		private final String description;
+		private final List<BotOptions> optionList;
 		
-		BotSubCommands(String name, String description) {
+		BotSubCommands(String name, String description, List<BotOptions> optionList) {
 			this.name = name;
 			this.description = description;
+			this.optionList = optionList;
 		}
 	}
 	
 	@Getter
 	public enum BotOptions {
-		TARGET_URL("tu", "Target url"),
+		URL("url", "Target url"),
 		IMAGE_PERMISSION("ip", "Image permission");
 		
 		private final String name;
