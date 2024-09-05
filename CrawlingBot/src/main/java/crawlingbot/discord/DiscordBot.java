@@ -3,7 +3,9 @@ package crawlingbot.discord;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -11,8 +13,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import crawlingbot.discord.commands.BotSlashCommand;
 import crawlingbot.discord.domain.GuildDto;
+import crawlingbot.discord.domain.WebpageConfig;
 import crawlingbot.util.PropertyUtil;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -31,6 +33,8 @@ public class DiscordBot extends ListenerAdapter {
 	public static List<GuildDto> getGuildsInformation() {
 		return accessGuildsInformation;
 	}
+	
+	public static Map<String, WebpageConfig> webpageConfigs = new HashMap<>();
 
 	public void buildingBot() {
 		JDABuilder builder = JDABuilder.createDefault(botToken, GatewayIntent.GUILD_MESSAGES,
@@ -93,20 +97,28 @@ public class DiscordBot extends ListenerAdapter {
 	 */
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event) {
+		/* ignore if bot */
+		if (event.getAuthor().isBot())
+			return;
+
 		log.info("====<> MESSAGE RECEIVED");
 
 		log.debug("========<> textChannel: {}", event.getChannel().getName());
 		log.debug("========<> author: {}", event.getAuthor().getName());
 		log.debug("========<> content: \n{}", event.getMessage().getContentDisplay());
 
-		/* ignore if bot */
-		if (event.getAuthor().isBot())
-			return;
 	}
 
 	@Override
 	public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		BotSlashCommand command = new BotSlashCommand();
-		command.slashCommandAction(event);
+		
+		switch (event.getSubcommandName()) {
+		case "w-add":
+			command.addTargetWebpage(event);
+			break;
+		default:
+			break;
+		}
 	}
 }
