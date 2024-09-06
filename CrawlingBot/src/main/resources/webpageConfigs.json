@@ -1,0 +1,8 @@
+[ {
+  "channelId" : "1234820747302539284",
+  "configName" : "aaa",
+  "webpageUrl" : "bbb",
+  "imgVisivility" : false,
+  "crawlingCycle" : 5,
+  "pk" : [ "1234820747302539284", "aaa" ]
+} ]

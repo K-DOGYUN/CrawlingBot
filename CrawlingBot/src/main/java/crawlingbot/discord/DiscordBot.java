@@ -3,12 +3,11 @@ package crawlingbot.discord;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import crawlingbot.discord.commands.BotSlashCommand;
@@ -34,7 +33,7 @@ public class DiscordBot extends ListenerAdapter {
 		return accessGuildsInformation;
 	}
 	
-	public static Map<String, WebpageConfig> webpageConfigs = new HashMap<>();
+	public static List<WebpageConfig> webpageConfigs = new ArrayList<>();
 
 	public void buildingBot() {
 		JDABuilder builder = JDABuilder.createDefault(botToken, GatewayIntent.GUILD_MESSAGES,
@@ -43,53 +42,24 @@ public class DiscordBot extends ListenerAdapter {
 		builder.addEventListeners(new DiscordBot()).build();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void onReady(ReadyEvent event) {
 		log.info("====<> BOT READY");
 		/* Slash Command Initialization */
 		BotSlashCommand botCommands = new BotSlashCommand();
 		botCommands.initCommands(event.getJDA().updateCommands());
-		/* Slash Command Initialization */
-		
+
+		/* Read Crawling Target Webpage Configs */
 		ObjectMapper mapper = new ObjectMapper();
 		try {
-			accessGuildsInformation = mapper.readValue(new File("src/main/resources/guidls.json"), List.class);
-			log.info("====<> READ CRAWLING DATA SUCCESS");
+			webpageConfigs = mapper.readValue(
+					new File("src/main/resources/webpageConfigs.json"),
+					new TypeReference<List<WebpageConfig>>() {});
+			log.info("====<> Read WebpageConfigs Success");
 		} catch (IOException e) {
-			log.error("====<> READ CRAWLING DATA FAILED!");
+			log.error("====<> Read WebpageConfigs Failed!");
 			log.error(e.toString());
 		}
-
-//		event.getJDA().getGuilds().forEach(guild -> {
-//			log.info("========<> guild: {}", guild.getName());
-//
-//			/* guild info setting */
-//			GuildDto guildInfo = new GuildDto();
-//			guildInfo.setId(guild.getId());
-//			guildInfo.setName(guild.getName());
-//
-//			guild.getTextChannels().forEach(textChannel -> {
-//				log.info("============<> textChannel: {}", textChannel.getName());
-//
-//				ChannelDto channelInfo = new ChannelDto();
-//				channelInfo.setId(textChannel.getId());
-//				channelInfo.setName(textChannel.getName());
-//				guildInfo.getChannels().add(channelInfo);
-//			});
-//
-//			accessGuilds.add(guildInfo);
-//		});
-//
-//		ObjectMapper mapper = new ObjectMapper();
-//		mapper.enable(SerializationFeature.INDENT_OUTPUT);
-//
-//		try {
-//			mapper.writeValue(new File("src/main/resources/guidls.json"), accessGuilds);
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 	}
 
 	/**
@@ -106,7 +76,6 @@ public class DiscordBot extends ListenerAdapter {
 		log.debug("========<> textChannel: {}", event.getChannel().getName());
 		log.debug("========<> author: {}", event.getAuthor().getName());
 		log.debug("========<> content: \n{}", event.getMessage().getContentDisplay());
-
 	}
 
 	@Override
@@ -116,6 +85,9 @@ public class DiscordBot extends ListenerAdapter {
 		switch (event.getSubcommandName()) {
 		case "w-add":
 			command.addTargetWebpage(event);
+			break;
+		case "w-edit":
+			command.editTargetWebpage(event);
 			break;
 		default:
 			break;
