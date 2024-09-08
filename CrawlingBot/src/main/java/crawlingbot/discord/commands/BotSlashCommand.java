@@ -3,10 +3,7 @@ package crawlingbot.discord.commands;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -98,26 +95,16 @@ public class BotSlashCommand {
 		WebpageConfig config = new WebpageConfig();
 		
 		config.setChannelId(event.getChannelId());
-		config.setConfigName(event.getOption(BotOptions.ADD_TARGET_NAME.getName()).getAsString());
+		config.setConfigName(event.getOption(BotOptions.ADD_TARGET_NAME.getName(), OptionMapping::getAsString));
+		config.setWebpageUrl(event.getOption(BotOptions.ADD_WEBPAGE_URL.getName(), OptionMapping::getAsString));
+		config.setCrawlingCycle(event.getOption(BotOptions.ADD_CRAWLING_CYCLE.getName(), 5, OptionMapping::getAsInt));
+		config.setImgVisivility(event.getOption(BotOptions.ADD_IMG_VISIVILITY.getName(), false, OptionMapping::getAsBoolean));
 		
-		if (DiscordBot.webpageConfigs.stream().anyMatch(wc -> wc.isSame(config.getChannelId(), config.getConfigName()))) {
+		/*A configuration with this name already exists.*/
+		if (DiscordBot.webpageConfigs.stream().anyMatch(wc -> wc.isSame(config.getChannelId(), config.getConfigName())))
 			throw new DiscordCommandException("A configuration with this name already exists.\n", event);
-		}
 		
-		config.setWebpageUrl(event.getOption(BotOptions.ADD_WEBPAGE_URL.getName()).getAsString());
-		
-		try {
-			config.setCrawlingCycle(event.getOption(BotOptions.ADD_CRAWLING_CYCLE.getName()).getAsInt());
-		} catch (NullPointerException e) {
-			reply.addContent("Crawling cycle has been set to the default value: 5 seconds.\n");
-		}
-		
-		try {
-			config.setImgVisivility(event.getOption(BotOptions.ADD_IMG_VISIVILITY.getName()).getAsBoolean());
-		} catch (NullPointerException e) {
-			reply.addContent("Image visibility has been set to the default value: false.\n");
-		}
-		
+		/*add new config*/
 		log.info("====<> {}", config.toString());
 		DiscordBot.webpageConfigs.add(config);
 		
@@ -131,17 +118,14 @@ public class BotSlashCommand {
 		
 		ReplyCallbackAction reply = event.reply("");
 		
-		WebpageConfig config = new WebpageConfig();
-		
-		config.setChannelId(event.getChannelId());
-		config.setConfigName(event.getOption(BotOptions.EDIT_TARGET_NAME.getName()).getAsString());
-		
-		if (!DiscordBot.webpageConfigs.stream().anyMatch(wc -> wc.isSame(config.getChannelId(), config.getConfigName()))) {
+		/*No configuration with such a name exists.*/
+		if (!DiscordBot.webpageConfigs.stream().anyMatch(wc -> wc.isSame(event.getChannelId(),
+				event.getOption(BotOptions.ADD_TARGET_NAME.getName(), OptionMapping::getAsString))))
 			throw new DiscordCommandException("No configuration with such a name exists.\n", event);
-		}
 		
+		/*edit*/
 		DiscordBot.webpageConfigs.stream()
-		.filter(wc -> wc.isSame(config.getChannelId(), config.getConfigName()))
+		.filter(wc -> wc.isSame(event.getChannelId(), event.getOption(BotOptions.ADD_TARGET_NAME.getName(), OptionMapping::getAsString)))
 		.forEach(wc -> {
 			wc.setWebpageUrl(event.getOption(BotOptions.EDIT_WEBPAGE_URL.getName(), wc.getWebpageUrl(), OptionMapping::getAsString));
 			wc.setCrawlingCycle(event.getOption(BotOptions.EDIT_CRAWLING_CYCLE.getName(), wc.getCrawlingCycle(), OptionMapping::getAsInt));
@@ -158,22 +142,23 @@ public class BotSlashCommand {
 		
 		ReplyCallbackAction reply = event.reply("");
 		
-		WebpageConfig config = new WebpageConfig();
-		
-		config.setChannelId(event.getChannelId());
-		config.setConfigName(event.getOption(BotOptions.EDIT_TARGET_NAME.getName()).getAsString());
-		
-		if (!DiscordBot.webpageConfigs.stream().anyMatch(wc -> wc.isSame(config.getChannelId(), config.getConfigName()))) {
+		if (!DiscordBot.webpageConfigs.removeIf(wc -> wc.isSame(event.getChannelId(),
+				event.getOption(BotOptions.DEL_TARGET_NAME.getName(), OptionMapping::getAsString))))
 			throw new DiscordCommandException("No configuration with such a name exists.\n", event);
-		}
-		
-		DiscordBot.webpageConfigs.stream()
-		.filter(wc -> wc.isSame(config.getChannelId(), config.getConfigName()))
-		.forEach(wc -> DiscordBot.webpageConfigs.remove(wc));
 		
 		saveWebpageConfigs();
 		
-		reply.addContent("Edit WebpageConfig success").queue();
+		reply.addContent("Delete WebpageConfig success").queue();
+	}
+	
+	public void lookUpTargetWebpage(SlashCommandInteractionEvent event) {
+		ReplyCallbackAction reply = event.reply("Registered config list\r\n");
+		
+		DiscordBot.webpageConfigs.stream()
+		.filter(wc -> StringUtils.equals(event.getChannelId(), wc.getChannelId()))
+		.forEach(wc -> reply.addContent(wc.toString()));
+		
+		reply.queue();
 	}
 	
 	private void saveWebpageConfigs() {
@@ -230,8 +215,8 @@ public class BotSlashCommand {
 	public enum BotOptions {
 		ADD_TARGET_NAME("target-name", "Duplicate entry not allowed", OptionType.STRING, "w-add", true),
 		ADD_WEBPAGE_URL("webpage-url", "Webpage Url", OptionType.STRING, "w-add", true),
-		ADD_IMG_VISIVILITY("img-visivility", "Img Visivility", OptionType.BOOLEAN, "w-add", false),
-		ADD_CRAWLING_CYCLE("crawling-cycle", "Input in seconds", OptionType.INTEGER, "w-add", false),
+		ADD_IMG_VISIVILITY("img-visivility", "Defalut value is false", OptionType.BOOLEAN, "w-add", false),
+		ADD_CRAWLING_CYCLE("crawling-cycle", "Default value is 5 sec", OptionType.INTEGER, "w-add", false),
 		
 		EDIT_TARGET_NAME("target-name", "You can see target list by using '/cw lu'", OptionType.STRING, "w-edit", true),
 		EDIT_WEBPAGE_URL("webpage-url", "Webpage Url", OptionType.STRING, "w-edit", false),

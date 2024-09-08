@@ -1,13 +1,10 @@
 package crawlingbot.discord.domain;
 
-
 import org.apache.commons.lang3.StringUtils;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
-@ToString
 @Getter
 @Setter
 public class WebpageConfig {
@@ -17,12 +14,15 @@ public class WebpageConfig {
 	private boolean imgVisivility = false;
 	private int crawlingCycle = 5;
 	
-	public String[] getPk() {
-		String[] pk = {this.channelId, this.configName};
-		return pk;
-	}
-	
 	public boolean isSame(String channelId, String configName) {
 		return StringUtils.equals(channelId, this.channelId) && StringUtils.equals(configName, this.configName);
+	}
+	
+	public String toString() {
+		return 
+				"\r\n Config name: " + configName
+				+ "\r\n====<> Crawling Target Webpage Url: " + webpageUrl
+				+ "\r\n====<> Image Visivility: " + imgVisivility
+				+ "\r\n====<> Crawling Cycle: " + crawlingCycle + " second";
 	}
 }

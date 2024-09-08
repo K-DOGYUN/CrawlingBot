@@ -89,6 +89,12 @@ public class DiscordBot extends ListenerAdapter {
 		case "w-edit":
 			command.editTargetWebpage(event);
 			break;
+		case "w-del":
+			command.deleteTargetWebpage(event);
+			break;
+		case "w-lu":
+			command.lookUpTargetWebpage(event);
+			break;
 		default:
 			break;
 		}
