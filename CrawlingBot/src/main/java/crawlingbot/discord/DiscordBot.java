@@ -10,7 +10,7 @@ import org.apache.commons.codec.binary.Base64;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import crawlingbot.discord.commands.BotSlashCommand;
+import crawlingbot.discord.commands.SlashCommandFunctions;
 import crawlingbot.discord.domain.GuildDto;
 import crawlingbot.discord.domain.WebpageConfig;
 import crawlingbot.util.PropertyUtil;
@@ -46,7 +46,7 @@ public class DiscordBot extends ListenerAdapter {
 	public void onReady(ReadyEvent event) {
 		log.info("====<> BOT READY");
 		/* Slash Command Initialization */
-		BotSlashCommand botCommands = new BotSlashCommand();
+		SlashCommandFunctions botCommands = new SlashCommandFunctions();
 		botCommands.initCommands(event.getJDA().updateCommands());
 
 		/* Read Crawling Target Webpage Configs */
@@ -80,7 +80,7 @@ public class DiscordBot extends ListenerAdapter {
 
 	@Override
 	public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-		BotSlashCommand command = new BotSlashCommand();
+		SlashCommandFunctions command = new SlashCommandFunctions();
 		
 		switch (event.getSubcommandName()) {
 		case "w-add":

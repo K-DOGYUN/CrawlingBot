@@ -18,13 +18,14 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 
 @Slf4j
-public class BotSlashCommand {
+public class SlashCommandFunctions {
 	
 	/**
 	 * Configures slash commands for the bot during initialization.
@@ -46,43 +47,31 @@ public class BotSlashCommand {
 	 * @see #BotSubCommands
 	 */
 	public void initCommands(CommandListUpdateAction commands) {
-		for (BotCommands bc : BotCommands.values()) {
-			SlashCommandData commandData = Commands.slash(bc.getName(), bc.getDescription());
+		/*Set Bot Slash Command*/
+		Arrays.stream(BotSlashCommand.values())
+		.forEach(bc -> {
+			SlashCommandData commandData = bc.getCommand();
 			
-			/*find matched subcommands*/
-			BotSubCommands[] botSubCommands = 
-					Arrays.stream(BotSubCommands.values())
-					.filter(e -> StringUtils.equals(e.getParent(), bc.getName()))
-					.toArray(BotSubCommands[]::new);
-			
-			for (BotSubCommands bsc : botSubCommands) {
-				SubcommandData subcommandData = new SubcommandData(bsc.getName(), bsc.getDescription());
+			/*Set Bot Sub Command*/
+			Arrays.stream(BotSubCommand.values()).filter(bsc -> StringUtils.equals(bsc.getParent(), bc.getName()))
+			.forEach(bsc -> {
+				SubcommandData subcommandData = bsc.getCommand();
 				
-				/*find matched options*/
-				BotOptions[] botOptions = 
-						Arrays.stream(BotOptions.values())
-						.filter(e -> StringUtils.equals(e.getParent(), bsc.getName()))
-						.toArray(BotOptions[]::new);
-				
-				for (BotOptions bo : botOptions) {
-					subcommandData.addOption(bo.getOptionType(), bo.getName(), bo.getDescription(), bo.isRequired());
-				}
+				/*Set Options for Sub Command*/
+				Arrays.stream(BotOption.values())
+				.filter(bo -> StringUtils.equals(bo.getParent(), bsc.getName()))
+				.forEach(bo -> subcommandData.addOptions(bo.getOption()));
 				
 				commandData.addSubcommands(subcommandData);
-			}
+			});
 			
-			/*find matched options*/
-			BotOptions[] botOptions = 
-					Arrays.stream(BotOptions.values())
-					.filter(e -> StringUtils.equals(e.getParent(), bc.getName()))
-					.toArray(BotOptions[]::new);
-			
-			for (BotOptions bo : botOptions) {
-				commandData.addOption(bo.getOptionType(), bo.getName(), bo.getDescription(), bo.isRequired());
-			}
+			/*Set Options for Slash Command*/
+			Arrays.stream(BotOption.values())
+			.filter(bo -> StringUtils.equals(bo.getParent(), bc.getName()))
+			.forEach(bo -> commandData.addOptions(bo.getOption()));
 			
 			commands.addCommands(commandData);
-		}
+		});
 		
 		commands.queue();
 	}
@@ -90,51 +79,47 @@ public class BotSlashCommand {
 	public void addTargetWebpage(SlashCommandInteractionEvent event) {
 		log.info("====<> Add Target Webpage");
 		
-		ReplyCallbackAction reply = event.reply("");
-		
-		WebpageConfig config = new WebpageConfig();
-		
-		config.setChannelId(event.getChannelId());
-		config.setConfigName(event.getOption(BotOptions.ADD_TARGET_NAME.getName(), OptionMapping::getAsString));
-		config.setWebpageUrl(event.getOption(BotOptions.ADD_WEBPAGE_URL.getName(), OptionMapping::getAsString));
-		config.setCrawlingCycle(event.getOption(BotOptions.ADD_CRAWLING_CYCLE.getName(), 5, OptionMapping::getAsInt));
-		config.setImgVisivility(event.getOption(BotOptions.ADD_IMG_VISIVILITY.getName(), false, OptionMapping::getAsBoolean));
-		
 		/*A configuration with this name already exists.*/
-		if (DiscordBot.webpageConfigs.stream().anyMatch(wc -> wc.isSame(config.getChannelId(), config.getConfigName())))
+		if (DiscordBot.webpageConfigs.stream().anyMatch(wc -> wc.isSame(event.getChannelId(),
+				event.getOption(BotOption.ADD_TARGET_NAME.getName(), OptionMapping::getAsString)))) {
 			throw new DiscordCommandException("A configuration with this name already exists.\n", event);
+		}
 		
 		/*add new config*/
-		log.info("====<> {}", config.toString());
+		WebpageConfig config = new WebpageConfig().setByDiscord(event);
 		DiscordBot.webpageConfigs.add(config);
+		log.debug("====<> {}", config.toString());
 		
+		event.reply("")
+		.addContent(config.toString())
+		.addContent("\r\nAdd WebpageConfig success")
+		.queue();
+
 		saveWebpageConfigs();
-		
-		reply.addContent("Add WebpageConfig success").queue();
 	}
 	
 	public void editTargetWebpage(SlashCommandInteractionEvent event) {
 		log.info("====<> Edit Target Webpage");
 		
-		ReplyCallbackAction reply = event.reply("");
-		
 		/*No configuration with such a name exists.*/
 		if (!DiscordBot.webpageConfigs.stream().anyMatch(wc -> wc.isSame(event.getChannelId(),
-				event.getOption(BotOptions.ADD_TARGET_NAME.getName(), OptionMapping::getAsString))))
+				event.getOption(BotOption.ADD_TARGET_NAME.getName(), OptionMapping::getAsString))))
 			throw new DiscordCommandException("No configuration with such a name exists.\n", event);
 		
 		/*edit*/
 		DiscordBot.webpageConfigs.stream()
-		.filter(wc -> wc.isSame(event.getChannelId(), event.getOption(BotOptions.ADD_TARGET_NAME.getName(), OptionMapping::getAsString)))
+		.filter(wc -> wc.isSame(event.getChannelId(), event.getOption(BotOption.ADD_TARGET_NAME.getName(), OptionMapping::getAsString)))
 		.forEach(wc -> {
-			wc.setWebpageUrl(event.getOption(BotOptions.EDIT_WEBPAGE_URL.getName(), wc.getWebpageUrl(), OptionMapping::getAsString));
-			wc.setCrawlingCycle(event.getOption(BotOptions.EDIT_CRAWLING_CYCLE.getName(), wc.getCrawlingCycle(), OptionMapping::getAsInt));
-			wc.setImgVisivility(event.getOption(BotOptions.EDIT_IMG_VISIVILITY.getName(), wc.isImgVisivility(), OptionMapping::getAsBoolean));
+			wc.setByDiscord(event);
+			
+			event.reply("")
+			.addContent(wc.toString())
+			.addContent("Edit WebpageConfig success")
+			.queue();
 		});
 		
 		saveWebpageConfigs();
 		
-		reply.addContent("Edit WebpageConfig success").queue();
 	}
 	
 	public void deleteTargetWebpage(SlashCommandInteractionEvent event) {
@@ -143,7 +128,7 @@ public class BotSlashCommand {
 		ReplyCallbackAction reply = event.reply("");
 		
 		if (!DiscordBot.webpageConfigs.removeIf(wc -> wc.isSame(event.getChannelId(),
-				event.getOption(BotOptions.DEL_TARGET_NAME.getName(), OptionMapping::getAsString))))
+				event.getOption(BotOption.DEL_TARGET_NAME.getName(), OptionMapping::getAsString))))
 			throw new DiscordCommandException("No configuration with such a name exists.\n", event);
 		
 		saveWebpageConfigs();
@@ -173,23 +158,27 @@ public class BotSlashCommand {
 	}
 
 	@Getter
-	public static enum BotCommands {
+	public static enum BotSlashCommand {
 		CRAWLING_SETTING("cw", "Crawling Setting");
 		
 		private final String name;
 		private final String description;
 		
-		BotCommands(
+		BotSlashCommand(
 				String name, 
 				String description
 				) {
 			this.name = name;
 			this.description = description;
 		}
+		
+		public SlashCommandData getCommand() {
+			return Commands.slash(name, description);
+		}
 	}
 	
 	@Getter
-	public enum BotSubCommands {
+	public enum BotSubCommand {
 		LOOKUP_TARGET_WEBPAGE("w-lu", "Look Up Target Webpage List", "cw"),
 		
 		ADD_TARGET_WEBPAGE("w-add", "Add Target Webpage", "cw"),
@@ -200,7 +189,7 @@ public class BotSlashCommand {
 		private final String description;
 		private final String parent;
 		
-		BotSubCommands(
+		BotSubCommand(
 				String name, 
 				String description, 
 				String parent
@@ -209,10 +198,14 @@ public class BotSlashCommand {
 			this.description = description;
 			this.parent = parent;
 		}
+		
+		public SubcommandData getCommand() {
+			return new SubcommandData(name, description);
+		}
 	}
 	
 	@Getter
-	public enum BotOptions {
+	public enum BotOption {
 		ADD_TARGET_NAME("target-name", "Duplicate entry not allowed", OptionType.STRING, "w-add", true),
 		ADD_WEBPAGE_URL("webpage-url", "Webpage Url", OptionType.STRING, "w-add", true),
 		ADD_IMG_VISIVILITY("img-visivility", "Defalut value is false", OptionType.BOOLEAN, "w-add", false),
@@ -231,7 +224,7 @@ public class BotSlashCommand {
 		private final String parent;
 		private final boolean required;
 		
-		BotOptions(
+		BotOption(
 				String name, 
 				String description,
 				OptionType optionType,
@@ -243,6 +236,10 @@ public class BotSlashCommand {
 			this.optionType = optionType;
 			this.parent = parent;
 			this.required = required;
+		}
+		
+		public OptionData getOption() {
+			return new OptionData(optionType, name, description, required);
 		}
 	}
 }
