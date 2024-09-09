@@ -4,4 +4,10 @@
   "webpageUrl" : "aaaa\\",
   "imgVisivility" : false,
   "crawlingCycle" : 5
+}, {
+  "channelId" : "1234820747302539284",
+  "configName" : "abab",
+  "webpageUrl" : "abab",
+  "imgVisivility" : false,
+  "crawlingCycle" : 5
 } ]
