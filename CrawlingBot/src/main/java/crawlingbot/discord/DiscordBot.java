@@ -1,18 +1,12 @@
 package crawlingbot.discord;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.codec.binary.Base64;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import crawlingbot.discord.commands.SlashCommandFunctions;
 import crawlingbot.discord.domain.GuildDto;
-import crawlingbot.discord.domain.WebpageConfig;
 import crawlingbot.util.PropertyUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDABuilder;
@@ -28,12 +22,10 @@ public class DiscordBot extends ListenerAdapter {
 	private static String botToken = new String(Base64.decodeBase64(PropertyUtil.getProps("discord.botToken")));
 
 	private static List<GuildDto> accessGuildsInformation = new ArrayList<>();
-	
+
 	public static List<GuildDto> getGuildsInformation() {
 		return accessGuildsInformation;
 	}
-	
-	public static List<WebpageConfig> webpageConfigs = new ArrayList<>();
 
 	public void buildingBot() {
 		JDABuilder builder = JDABuilder.createDefault(botToken, GatewayIntent.GUILD_MESSAGES,
@@ -48,18 +40,6 @@ public class DiscordBot extends ListenerAdapter {
 		/* Slash Command Initialization */
 		SlashCommandFunctions botCommands = new SlashCommandFunctions();
 		botCommands.initCommands(event.getJDA().updateCommands());
-
-		/* Read Crawling Target Webpage Configs */
-		ObjectMapper mapper = new ObjectMapper();
-		try {
-			webpageConfigs = mapper.readValue(
-					new File("src/main/resources/webpageConfigs.json"),
-					new TypeReference<List<WebpageConfig>>() {});
-			log.info("====<> Read WebpageConfigs Success");
-		} catch (IOException e) {
-			log.error("====<> Read WebpageConfigs Failed!");
-			log.error(e.toString());
-		}
 	}
 
 	/**
@@ -81,7 +61,7 @@ public class DiscordBot extends ListenerAdapter {
 	@Override
 	public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		SlashCommandFunctions command = new SlashCommandFunctions();
-		
+
 		switch (event.getSubcommandName()) {
 		case "w-add":
 			command.addTargetWebpage(event);

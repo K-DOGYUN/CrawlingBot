@@ -9,9 +9,9 @@ import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import crawlingbot.discord.DiscordBot;
-import crawlingbot.discord.domain.WebpageConfig;
 import crawlingbot.discord.exception.DiscordCommandException;
+import crawlingbot.domain.WebpageConfig;
+import crawlingbot.domain.WebpageConfigs;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -22,7 +22,6 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 
 @Slf4j
 public class SlashCommandFunctions {
@@ -79,71 +78,41 @@ public class SlashCommandFunctions {
 	public void addTargetWebpage(SlashCommandInteractionEvent event) {
 		log.info("====<> Add Target Webpage");
 		
-		/*A configuration with this name already exists.*/
-		if (DiscordBot.webpageConfigs.stream().anyMatch(wc -> wc.isSame(event.getChannelId(),
-				event.getOption(BotOption.ADD_TARGET_NAME.getName(), OptionMapping::getAsString)))) {
-			throw new DiscordCommandException("A configuration with this name already exists.\n", event);
-		}
+		if (WebpageConfigs.getInstance().addConfig(new WebpageConfig().setByDiscord(event)))
+			throw new DiscordCommandException("A configuration with this name already exists.\r\n", event);
 		
-		/*add new config*/
-		WebpageConfig config = new WebpageConfig().setByDiscord(event);
-		DiscordBot.webpageConfigs.add(config);
-		log.debug("====<> {}", config.toString());
+		event.reply("Add WebpageConfig success\r\n").queue();
 		
-		event.reply("")
-		.addContent(config.toString())
-		.addContent("\r\nAdd WebpageConfig success")
-		.queue();
-
-		saveWebpageConfigs();
+		WebpageConfigs.getInstance().saveConfigs();
 	}
 	
 	public void editTargetWebpage(SlashCommandInteractionEvent event) {
 		log.info("====<> Edit Target Webpage");
 		
-		/*No configuration with such a name exists.*/
-		if (!DiscordBot.webpageConfigs.stream().anyMatch(wc -> wc.isSame(event.getChannelId(),
-				event.getOption(BotOption.ADD_TARGET_NAME.getName(), OptionMapping::getAsString))))
+		if (WebpageConfigs.getInstance().editConfigByDiscordEvent(event))
 			throw new DiscordCommandException("No configuration with such a name exists.\n", event);
 		
-		/*edit*/
-		DiscordBot.webpageConfigs.stream()
-		.filter(wc -> wc.isSame(event.getChannelId(), event.getOption(BotOption.ADD_TARGET_NAME.getName(), OptionMapping::getAsString)))
-		.forEach(wc -> {
-			wc.setByDiscord(event);
-			
-			event.reply("")
-			.addContent(wc.toString())
-			.addContent("Edit WebpageConfig success")
-			.queue();
-		});
+		event.reply("Edit WebpageConfig success\r\n").queue();
 		
-		saveWebpageConfigs();
-		
+		WebpageConfigs.getInstance().saveConfigs();
 	}
 	
 	public void deleteTargetWebpage(SlashCommandInteractionEvent event) {
 		log.info("====<> Delete Target Webpage");
 		
-		ReplyCallbackAction reply = event.reply("");
-		
-		if (!DiscordBot.webpageConfigs.removeIf(wc -> wc.isSame(event.getChannelId(),
-				event.getOption(BotOption.DEL_TARGET_NAME.getName(), OptionMapping::getAsString))))
+		if (WebpageConfigs.getInstance().deleteConfig(event.getChannelId(),
+				event.getOption(BotOption.DEL_TARGET_NAME.getName(), OptionMapping::getAsString)))
 			throw new DiscordCommandException("No configuration with such a name exists.\n", event);
 		
-		saveWebpageConfigs();
+		event.reply("Delete WebpageConfig success\r\n").queue();
 		
-		reply.addContent("Delete WebpageConfig success").queue();
+		saveWebpageConfigs();
 	}
 	
 	public void lookUpTargetWebpage(SlashCommandInteractionEvent event) {
-		ReplyCallbackAction reply = event.reply("Registered config list\r\n");
-		
-		DiscordBot.webpageConfigs.stream()
-		.filter(wc -> StringUtils.equals(event.getChannelId(), wc.getChannelId()))
-		.forEach(wc -> reply.addContent(wc.toString()));
-		
-		reply.queue();
+		event.reply("Crawling Target Webpage Config List")
+		.addContent(WebpageConfigs.getInstance().toStringForLookUp())
+		.queue();
 	}
 	
 	private void saveWebpageConfigs() {
@@ -151,7 +120,7 @@ public class SlashCommandFunctions {
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 
 		try {
-			mapper.writeValue(new File("src/main/resources/webpageConfigs.json"), DiscordBot.webpageConfigs);
+			mapper.writeValue(new File("src/main/resources/webpageConfigs.json"), WebpageConfigs.getInstance().getConfigs());
 		} catch (IOException e) {
 			log.error(e.toString());
 		}
@@ -208,12 +177,12 @@ public class SlashCommandFunctions {
 	public enum BotOption {
 		ADD_TARGET_NAME("target-name", "Duplicate entry not allowed", OptionType.STRING, "w-add", true),
 		ADD_WEBPAGE_URL("webpage-url", "Webpage Url", OptionType.STRING, "w-add", true),
-		ADD_IMG_VISIVILITY("img-visivility", "Defalut value is false", OptionType.BOOLEAN, "w-add", false),
+		ADD_IMG_VISIBILITY("img-visibility", "Defalut value is false", OptionType.BOOLEAN, "w-add", false),
 		ADD_CRAWLING_CYCLE("crawling-cycle", "Default value is 5 sec", OptionType.INTEGER, "w-add", false),
-		
+
 		EDIT_TARGET_NAME("target-name", "You can see target list by using '/cw lu'", OptionType.STRING, "w-edit", true),
 		EDIT_WEBPAGE_URL("webpage-url", "Webpage Url", OptionType.STRING, "w-edit", false),
-		EDIT_IMG_VISIVILITY("img-visivility", "Img Visivility", OptionType.BOOLEAN, "w-edit", false),
+		EDIT_IMG_VISIBILITY("img-visibility", "Img Visibility", OptionType.BOOLEAN, "w-edit", false),
 		EDIT_CRAWLING_CYCLE("crawling-cycle", "Input in seconds", OptionType.INTEGER, "w-edit", false),
 
 		DEL_TARGET_NAME("target-name", "You can see target list by using '/cw lu'", OptionType.STRING, "w-del", true);

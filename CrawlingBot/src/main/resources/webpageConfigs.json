@@ -2,12 +2,12 @@
   "channelId" : "1234820747302539284",
   "configName" : "aaaa",
   "webpageUrl" : "aaaa\\",
-  "imgVisivility" : false,
+  "imgVisibility" : false,
   "crawlingCycle" : 5
 }, {
   "channelId" : "1234820747302539284",
   "configName" : "abab",
   "webpageUrl" : "abab",
-  "imgVisivility" : false,
+  "imgVisibility" : false,
   "crawlingCycle" : 5
 } ]
