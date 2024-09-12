@@ -3,6 +3,8 @@ package crawlingbot.discord.commands;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -17,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
@@ -46,6 +49,17 @@ public class SlashCommandFunctions {
 	 * @see #BotSubCommands
 	 */
 	public void initCommands(CommandListUpdateAction commands) {
+		List<CommandData> commandDatas = Arrays.stream(BotSlashCommand.values()).map(BotSlashCommand::getCommand).collect(Collectors.toList());
+		List<SubcommandData> subcommandDatas = Arrays.stream(BotSubCommand.values()).map(BotSubCommand::getCommand).collect(Collectors.toList());
+		List<OptionData> optionDatas = Arrays.stream(BotOption.values()).map(BotOption::getOption).collect(Collectors.toList());
+		
+		Arrays.stream(OptionChoice.values()).forEach(choice -> {
+			optionDatas.forEach(option -> {
+				StringUtils.equals(option.getName(), choice.getParent());
+				option.addChoice(choice.getName(), choice.getValue());
+			});
+		});
+		
 		/*Set Bot Slash Command*/
 		Arrays.stream(BotSlashCommand.values())
 		.forEach(bc -> {
@@ -59,7 +73,9 @@ public class SlashCommandFunctions {
 				/*Set Options for Sub Command*/
 				Arrays.stream(BotOption.values())
 				.filter(bo -> StringUtils.equals(bo.getParent(), bsc.getName()))
-				.forEach(bo -> subcommandData.addOptions(bo.getOption()));
+				.forEach(bo -> {
+					subcommandData.addOptions(bo.getOption());
+				});
 				
 				commandData.addSubcommands(subcommandData);
 			});
@@ -209,6 +225,28 @@ public class SlashCommandFunctions {
 		
 		public OptionData getOption() {
 			return new OptionData(optionType, name, description, required);
+		}
+	}
+	
+	@Getter
+	public enum OptionChoice {
+		CYCLE_1SEC("1 sec", 1, "crawling-cycle"),
+		CYCLE_5SEC("5 sec", 5, "crawling-cycle"),
+		CYCLE_30SEC("30 sec", 30, "crawling-cycle"),
+		CYCLE_60SEC("60 sec", 60, "crawling-cycle");
+		
+		private final String name;
+		private final int value;
+		private final String parent;
+		
+		OptionChoice(
+				String name, 
+				int value,
+				String parent
+				) {
+			this.name = name;
+			this.value = value;
+			this.parent = parent;
 		}
 	}
 }
