@@ -6,8 +6,8 @@
   "crawlingCycle" : 5
 }, {
   "channelId" : "1234820747302539284",
-  "configName" : "abab",
-  "webpageUrl" : "abab",
+  "configName" : "니갤 념글",
+  "webpageUrl" : "https://gall.dcinside.com/mgallery/board/lists/?id=gov&exception_mode=recommend",
   "imgVisibility" : false,
-  "crawlingCycle" : 5
+  "crawlingCycle" : 30
 } ]

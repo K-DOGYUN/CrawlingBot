@@ -3,8 +3,6 @@ package crawlingbot.discord.commands;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -19,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
@@ -49,24 +46,14 @@ public class SlashCommandFunctions {
 	 * @see #BotSubCommands
 	 */
 	public void initCommands(CommandListUpdateAction commands) {
-		List<CommandData> commandDatas = Arrays.stream(BotSlashCommand.values()).map(BotSlashCommand::getCommand).collect(Collectors.toList());
-		List<SubcommandData> subcommandDatas = Arrays.stream(BotSubCommand.values()).map(BotSubCommand::getCommand).collect(Collectors.toList());
-		List<OptionData> optionDatas = Arrays.stream(BotOption.values()).map(BotOption::getOption).collect(Collectors.toList());
-		
-		Arrays.stream(OptionChoice.values()).forEach(choice -> {
-			optionDatas.forEach(option -> {
-				StringUtils.equals(option.getName(), choice.getParent());
-				option.addChoice(choice.getName(), choice.getValue());
-			});
-		});
-		
 		/*Set Bot Slash Command*/
 		Arrays.stream(BotSlashCommand.values())
 		.forEach(bc -> {
 			SlashCommandData commandData = bc.getCommand();
 			
 			/*Set Bot Sub Command*/
-			Arrays.stream(BotSubCommand.values()).filter(bsc -> StringUtils.equals(bsc.getParent(), bc.getName()))
+			Arrays.stream(BotSubCommand.values())
+			.filter(bsc -> StringUtils.equals(bsc.getParent(), bc.getName()))
 			.forEach(bsc -> {
 				SubcommandData subcommandData = bsc.getCommand();
 				
@@ -74,7 +61,14 @@ public class SlashCommandFunctions {
 				Arrays.stream(BotOption.values())
 				.filter(bo -> StringUtils.equals(bo.getParent(), bsc.getName()))
 				.forEach(bo -> {
-					subcommandData.addOptions(bo.getOption());
+					OptionData optionData = bo.getOption();
+					
+					/*Set Option Choices*/
+					Arrays.stream(OptionChoice.values())
+					.filter(ch -> StringUtils.equals(ch.getParent(), bo.getName()))
+					.forEach(ch -> optionData.addChoice(ch.getName(), ch.getValue()));
+					
+					subcommandData.addOptions(optionData);
 				});
 				
 				commandData.addSubcommands(subcommandData);
@@ -83,7 +77,16 @@ public class SlashCommandFunctions {
 			/*Set Options for Slash Command*/
 			Arrays.stream(BotOption.values())
 			.filter(bo -> StringUtils.equals(bo.getParent(), bc.getName()))
-			.forEach(bo -> commandData.addOptions(bo.getOption()));
+			.forEach(bo -> {
+				OptionData optionData = bo.getOption();
+				
+				/*Set Option Choices*/
+				Arrays.stream(OptionChoice.values())
+				.filter(ch -> StringUtils.equals(ch.getParent(), bo.getName()))
+				.forEach(ch -> optionData.addChoice(ch.getName(), ch.getValue()));
+				
+				commandData.addOptions(optionData);
+			});
 			
 			commands.addCommands(commandData);
 		});

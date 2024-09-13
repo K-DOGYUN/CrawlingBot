@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,6 +42,10 @@ public class WebpageConfigs {
 		return isContain(channelId, name)
 				? webpageConfigs.stream().filter(wc -> wc.isSame(channelId, name)).findAny().get()
 				: null;
+    }
+    
+    public List<WebpageConfig> getConfigByCycle(int cycle) {
+    	return webpageConfigs.stream().filter(config -> config.getCrawlingCycle() == cycle).collect(Collectors.toList());
     }
     
 	public boolean editConfig(WebpageConfig config) {

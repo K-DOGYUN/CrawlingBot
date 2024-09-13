@@ -7,10 +7,9 @@ import crawlingbot.domain.WebpageConfigs;
 public class Application {
 	
 	public static void main(String[] args) {
-		DiscordBot discordBot = new DiscordBot();
-		discordBot.buildingBot();
-		
+		/*boot bot*/
+		DiscordBot.getDiscordBot().buildingBot();
+		/*loading crawling webpage configs*/
 		WebpageConfigs.getInstance().loadConfigs();
-		CrawlingTimer.timer().setTimer();
 	}
 }

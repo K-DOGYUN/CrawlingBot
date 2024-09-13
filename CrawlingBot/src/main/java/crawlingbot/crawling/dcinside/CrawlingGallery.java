@@ -14,7 +14,7 @@ import java.io.IOException;
 
 @Slf4j
 public class CrawlingGallery {
-	public String crawling(WebpageConfig config) {
+	public static String crawling(WebpageConfig config) {
 
 		String message = "";
 

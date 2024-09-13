@@ -1,15 +1,16 @@
 package crawlingbot.discord;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 
+import crawlingbot.crawling.timer.CrawlingTimer;
 import crawlingbot.discord.commands.SlashCommandFunctions;
-import crawlingbot.discord.domain.GuildDto;
 import crawlingbot.util.PropertyUtil;
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
@@ -20,26 +21,56 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 @Slf4j
 public class DiscordBot extends ListenerAdapter {
 	private static String botToken = new String(Base64.decodeBase64(PropertyUtil.getProps("discord.botToken")));
+	private static JDA BOT;
 
-	private static List<GuildDto> accessGuildsInformation = new ArrayList<>();
+	private DiscordBot() {
+	}
 
-	public static List<GuildDto> getGuildsInformation() {
-		return accessGuildsInformation;
+	private static class InitBot {
+		private static final DiscordBot DISCORD_BOT = new DiscordBot();
+	}
+
+	public static DiscordBot getDiscordBot() {
+		return InitBot.DISCORD_BOT;
 	}
 
 	public void buildingBot() {
-		JDABuilder builder = JDABuilder.createDefault(botToken, GatewayIntent.GUILD_MESSAGES,
-				GatewayIntent.MESSAGE_CONTENT);
-		builder.disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOJI, CacheFlag.STICKER, CacheFlag.SCHEDULED_EVENTS);
-		builder.addEventListeners(new DiscordBot()).build();
+		if (StringUtils.isEmpty(botToken))
+			throw new IllegalStateException("Bot token is empty");
+		
+		BOT = JDABuilder.createDefault(botToken, GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT)
+				.disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOJI, CacheFlag.STICKER, CacheFlag.SCHEDULED_EVENTS)
+				.addEventListeners(getDiscordBot()).build();
+		
+		/*set crawling timers*/
+		CrawlingTimer.timer().setTimer();
+	}
+
+	public void sendMessage(String channelId, String content) {
+		if (StringUtils.isAnyEmpty(channelId, content))
+			throw new IllegalArgumentException("Channel ID and content must not be empty.");
+		
+		if (BOT.getTextChannelById(channelId) == null)
+			throw new NullPointerException("Channel with ID " + channelId + " does not exist.");
+		
+		BOT.getTextChannelById(channelId).sendMessage(content).queue();
+	}
+	
+	public void sendMessage(String channelId, MessageEmbed embed) {
+		if (ObjectUtils.isEmpty(channelId) || ObjectUtils.isEmpty(embed))
+			throw new IllegalArgumentException("Channel ID and content must not be empty.");
+		
+		if (BOT.getTextChannelById(channelId) == null)
+			throw new NullPointerException("Channel with ID " + channelId + " does not exist.");
+		
+		BOT.getTextChannelById(channelId).sendMessageEmbeds(embed).queue();
 	}
 
 	@Override
 	public void onReady(ReadyEvent event) {
 		log.info("====<> BOT READY");
 		/* Slash Command Initialization */
-		SlashCommandFunctions botCommands = new SlashCommandFunctions();
-		botCommands.initCommands(event.getJDA().updateCommands());
+		new SlashCommandFunctions().initCommands(event.getJDA().updateCommands());
 	}
 
 	/**
@@ -60,23 +91,26 @@ public class DiscordBot extends ListenerAdapter {
 
 	@Override
 	public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
+		if (event == null) 
+			throw new NullPointerException("There is no SlashCommandInteractionEvent");
+		
 		SlashCommandFunctions command = new SlashCommandFunctions();
 
 		switch (event.getSubcommandName()) {
-		case "w-add":
-			command.addTargetWebpage(event);
-			break;
-		case "w-edit":
-			command.editTargetWebpage(event);
-			break;
-		case "w-del":
-			command.deleteTargetWebpage(event);
-			break;
-		case "w-lu":
-			command.lookUpTargetWebpage(event);
-			break;
-		default:
-			break;
+			case "w-add":
+				command.addTargetWebpage(event);
+				break;
+			case "w-edit":
+				command.editTargetWebpage(event);
+				break;
+			case "w-del":
+				command.deleteTargetWebpage(event);
+				break;
+			case "w-lu":
+				command.lookUpTargetWebpage(event);
+				break;
+			default:
+				break;
 		}
 	}
 }
