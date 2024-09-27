@@ -41,6 +41,7 @@ public class CrawlingGallery {
 			} else {
 				config.setLatestCrawledUrl(url);
 				WebpageConfigs.getInstance().editConfig(config);
+				WebpageConfigs.getInstance().saveConfigs();
 			}
 
 			doc = Jsoup.connect(url).get();
@@ -55,7 +56,7 @@ public class CrawlingGallery {
 					message += element.ownText() + "\n";
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error(e.toString());
 		}
 		
 		if (message.length() > 2000)
