@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import crawlingbot.crawling.timer.CrawlingTimer;
 import crawlingbot.discord.commands.SlashCommandFunctions;
+import crawlingbot.domain.WebpageConfigs;
 import crawlingbot.util.PropertyUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
@@ -34,16 +35,13 @@ public class DiscordBot extends ListenerAdapter {
 		return InitBot.DISCORD_BOT;
 	}
 
-	public void buildingBot() {
+	public void buildingBot() throws InterruptedException {
 		if (StringUtils.isEmpty(botToken))
 			throw new IllegalStateException("Bot token is empty");
 		
 		BOT = JDABuilder.createDefault(botToken, GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT)
 				.disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOJI, CacheFlag.STICKER, CacheFlag.SCHEDULED_EVENTS)
-				.addEventListeners(getDiscordBot()).build();
-		
-		/*set crawling timers*/
-		CrawlingTimer.timer().setTimer();
+				.addEventListeners(getDiscordBot()).build().awaitReady();
 	}
 
 	public void sendMessage(String channelId, String content) {
@@ -53,7 +51,10 @@ public class DiscordBot extends ListenerAdapter {
 		if (BOT.getTextChannelById(channelId) == null)
 			throw new NullPointerException("Channel with ID " + channelId + " does not exist.");
 		
-		BOT.getTextChannelById(channelId).sendMessage(content).queue();
+		BOT.getTextChannelById(channelId).sendMessage(content).queue(
+		        success -> log.info("Message sent to channel {}: {}", channelId, content),
+		        failure -> log.error("Failed to send message to channel {}: {}", channelId, failure.getMessage())
+	    );
 	}
 	
 	public void sendMessage(String channelId, MessageEmbed embed) {
@@ -63,7 +64,10 @@ public class DiscordBot extends ListenerAdapter {
 		if (BOT.getTextChannelById(channelId) == null)
 			throw new NullPointerException("Channel with ID " + channelId + " does not exist.");
 		
-		BOT.getTextChannelById(channelId).sendMessageEmbeds(embed).queue();
+		BOT.getTextChannelById(channelId).sendMessageEmbeds(embed).queue(
+		        success -> log.info("Message sent to channel {}: {}", channelId, embed),
+		        failure -> log.error("Failed to send message to channel {}: {}", channelId, failure.getMessage())
+	    );
 	}
 
 	@Override
@@ -91,6 +95,10 @@ public class DiscordBot extends ListenerAdapter {
 
 	@Override
 	public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
+		syncedSlashCommandEvent(event);
+	}
+	
+	private synchronized void syncedSlashCommandEvent(SlashCommandInteractionEvent event) {
 		if (event == null) 
 			throw new NullPointerException("There is no SlashCommandInteractionEvent");
 		

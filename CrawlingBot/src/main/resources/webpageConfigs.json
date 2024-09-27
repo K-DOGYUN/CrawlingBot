@@ -1,13 +1,15 @@
 [ {
   "channelId" : "1234820747302539284",
-  "configName" : "aaaa",
-  "webpageUrl" : "aaaa\\",
-  "imgVisibility" : false,
-  "crawlingCycle" : 5
-}, {
-  "channelId" : "1234820747302539284",
   "configName" : "니갤 념글",
   "webpageUrl" : "https://gall.dcinside.com/mgallery/board/lists/?id=gov&exception_mode=recommend",
   "imgVisibility" : false,
-  "crawlingCycle" : 30
+  "crawlingCycle" : 5,
+  "latestCrawledUrl" : "https://gall.dcinside.com/mgallery/board/view/?id=gov&no=1974065&exception_mode=recommend&page=1"
+}, {
+  "channelId" : "1234820747302539284",
+  "configName" : "헬망호",
+  "webpageUrl" : "https://gall.dcinside.com/mgallery/board/lists/?id=helldiversseries&sort_type=N&search_head=60&page=1",
+  "imgVisibility" : false,
+  "crawlingCycle" : 1,
+  "latestCrawledUrl" : "https://gall.dcinside.com/mgallery/board/view/?id=helldiversseries&no=205385&search_head=60&page=1"
 } ]

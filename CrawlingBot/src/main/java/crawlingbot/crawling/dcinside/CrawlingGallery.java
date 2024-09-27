@@ -21,16 +21,22 @@ public class CrawlingGallery {
 		try {
 			// HTML 페이지 로드 및 파싱
 			Document doc = Jsoup.connect(config.getWebpageUrl()).get();
-
+			
 			// 원하는 데이터 추출
-			Elements elems = doc.select("tr.ub-content.us-post > td.gall_tit.ub-word"); // 예: h2 태그의 클래스가
-																						// "article-title"
-
-			// 추출된 데이터 출력
-			String url = "https://gall.dcinside.com" + elems.select("a").get(0).attr("href");
-
+			Elements elems = doc.select("tr.ub-content.us-post");
+			
+			String url = "";
+			
+			for (Element element : elems) {
+				if (StringUtils.equals("icon_notice", element.attr("data-type")))
+					continue;
+				
+				url = "https://gall.dcinside.com" + element.select("td.gall_tit.ub-word").select("a").get(0).attr("href");
+				
+				break;
+			}
+			
 			if (StringUtils.equals(config.getLatestCrawledUrl(), url)) {
-				log.info("중복 url");
 				return null;
 			} else {
 				config.setLatestCrawledUrl(url);
@@ -39,7 +45,7 @@ public class CrawlingGallery {
 
 			doc = Jsoup.connect(url).get();
 
-			Element title = doc.selectFirst("h3.title.ub-word");
+			Element title = doc.selectFirst("h3.title.ub-word > span.title_subject");
 			message += "[" + title.text() + "]" + "(" + url + ")" + "\n";
 
 			elems = doc.selectFirst("div.write_div").getAllElements();
@@ -51,7 +57,10 @@ public class CrawlingGallery {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
+		
+		if (message.length() > 2000)
+			message = StringUtils.substring(message, 0, 2000);
+		
 		return message;
 	}
 }
