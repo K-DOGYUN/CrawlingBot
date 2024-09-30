@@ -97,7 +97,7 @@ public class SlashCommandFunctions {
 	public void addTargetWebpage(SlashCommandInteractionEvent event) {
 		log.info("====<> Add Target Webpage");
 		
-		if (WebpageConfigs.getInstance().addConfig(new WebpageConfig().setByDiscord(event)))
+		if (!WebpageConfigs.getInstance().addConfig(new WebpageConfig().setByDiscord(event)))
 			throw new DiscordCommandException("A configuration with this name already exists.\r\n", event);
 		
 		event.reply("Add WebpageConfig success\r\n").queue();
@@ -108,7 +108,7 @@ public class SlashCommandFunctions {
 	public void editTargetWebpage(SlashCommandInteractionEvent event) {
 		log.info("====<> Edit Target Webpage");
 		
-		if (WebpageConfigs.getInstance().editConfigByDiscordEvent(event))
+		if (!WebpageConfigs.getInstance().editConfigByDiscordEvent(event))
 			throw new DiscordCommandException("No configuration with such a name exists.\n", event);
 		
 		event.reply("Edit WebpageConfig success\r\n").queue();
@@ -119,7 +119,7 @@ public class SlashCommandFunctions {
 	public void deleteTargetWebpage(SlashCommandInteractionEvent event) {
 		log.info("====<> Delete Target Webpage");
 		
-		if (WebpageConfigs.getInstance().deleteConfig(event.getChannelId(),
+		if (!WebpageConfigs.getInstance().deleteConfig(event.getChannelId(),
 				event.getOption(BotOption.DEL_TARGET_NAME.getName(), OptionMapping::getAsString)))
 			throw new DiscordCommandException("No configuration with such a name exists.\n", event);
 		
