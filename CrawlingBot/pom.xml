@@ -19,6 +19,11 @@
                     <!-- Specify the source and target Java version -->
                     <source>17</source> <!-- Replace with the desired version -->
                     <target>17</target> <!-- Replace with the desired version -->
+	                <archive>
+	                    <manifest>
+	                        <mainClass>src.main.java.crawlingbot.Application</mainClass> <!-- Replace with your actual main class -->
+	                    </manifest>
+	                </archive>
                 </configuration>
             </plugin>
         </plugins>
