@@ -28,7 +28,7 @@
                 <configuration>
 	                <archive>
 	                    <manifest>
-	                        <mainClass>src.main.java.crawlingbot.Application</mainClass> <!-- Replace with your actual main class -->
+	                        <mainClass>crawlingbot.Application</mainClass> <!-- Replace with your actual main class -->
 	                    </manifest>
 	                </archive>
                 </configuration>
