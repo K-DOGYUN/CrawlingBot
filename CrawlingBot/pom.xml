@@ -19,6 +19,13 @@
                     <!-- Specify the source and target Java version -->
                     <source>17</source> <!-- Replace with the desired version -->
                     <target>17</target> <!-- Replace with the desired version -->
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
 	                <archive>
 	                    <manifest>
 	                        <mainClass>src.main.java.crawlingbot.Application</mainClass> <!-- Replace with your actual main class -->
