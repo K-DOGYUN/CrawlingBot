@@ -1,0 +1,5 @@
+dev:
+  tokens: token_dev.properties
+  
+prod:
+  tokens: token_prod.properties

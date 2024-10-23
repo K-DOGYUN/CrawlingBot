@@ -8,7 +8,23 @@
 	    <maven.compiler.source>17</maven.compiler.source>
 	    <maven.compiler.target>17</maven.compiler.target>
 	</properties>
-  
+	
+	<profiles>
+	    <profile>
+	        <id>dev</id>
+	        <properties>
+	            <environment>dev</environment>
+	        </properties>
+	    </profile>
+	
+	    <profile>
+	        <id>prod</id>
+	        <properties>
+	            <environment>prod</environment>
+	        </properties>
+	    </profile>
+	</profiles>
+	
     <build>
         <plugins>
             <plugin>
@@ -28,7 +44,7 @@
                 <configuration>
 	                <archive>
 	                    <manifest>
-	                        <mainClass>crawlingbot.Application</mainClass> <!-- Replace with your actual main class -->
+	                        <mainClass>crawlingbot.Application</mainClass>  Replace with your actual main class 
 	                    </manifest>
 	                </archive>
                 </configuration>
@@ -127,6 +143,12 @@
 	        <groupId>org.jsoup</groupId>
 	        <artifactId>jsoup</artifactId>
 	        <version>1.15.4</version> <!-- Use the latest stable version -->
+	    </dependency>
+	    
+    	<dependency>
+	        <groupId>org.yaml</groupId>
+	        <artifactId>snakeyaml</artifactId>
+	        <version>1.30</version> <!-- Use the latest version -->
 	    </dependency>
 	</dependencies>
 </project>
