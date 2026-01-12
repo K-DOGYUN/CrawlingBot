@@ -20,7 +20,7 @@ public class PropertyUtil {
         try (InputStream in = new FileInputStream("src/main/resources/config.yaml")) {
             Map<String, Object> config = yaml.load(in);
             Map<String, String> profile = (Map<String, String>) config.get(System.getProperty("environment"));
-            tokens = profile.get("tokens");
+            tokens = profile.get("tokens").trim();
         } catch (Exception e) {
             e.printStackTrace();
         }

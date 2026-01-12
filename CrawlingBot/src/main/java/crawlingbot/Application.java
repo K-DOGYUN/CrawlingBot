@@ -8,7 +8,7 @@ public class Application {
 	
 	public static void main(String[] args) throws InterruptedException {
         if (System.getProperty("environment") == null) {
-            System.setProperty("environment", "dev");
+            System.setProperty("environment", "prod");
         }
 		
 		/*boot bot*/
