@@ -56,6 +56,22 @@ public class WebpageConfigs {
 			return true;
 		}
 	}
+	
+	/**
+	 * 크롤링 봇에서 확인한 최근 URL을 추가하는 메서드 <br/>
+	 * 크롤링 설정 하나당 최대 5개까지 저장한다
+	 * @param config
+	 * @param latestCrawledUrl
+	 * @return boolean
+	 */
+	public boolean addLatestCrawledUrl(WebpageConfig config, String latestCrawledUrl) {
+		if (!isContain(config.getChannelId(), config.getConfigName())) {
+			return false;
+		} else {
+			webpageConfigs.stream().filter(wc -> wc.isSame(config.getChannelId(), config.getConfigName())).findAny().get().addLatestCrawledUrl(latestCrawledUrl);
+			return true;
+		}
+	}
 
 	public boolean editConfigByDiscordEvent(SlashCommandInteractionEvent event) {
 		String channelId = event.getChannelId();

@@ -40,11 +40,10 @@ public class CrawlingGallery {
 				break;
 			}
 
-			if (StringUtils.equals(config.getLatestCrawledUrl(), url)) {
+			if (config.isLatestCrawledUrl(url)) {
 				return null;
 			} else {
-				config.setLatestCrawledUrl(url);
-				WebpageConfigs.getInstance().editConfig(config);
+				WebpageConfigs.getInstance().addLatestCrawledUrl(config, url);
 				WebpageConfigs.getInstance().saveConfigs();
 			}
 
