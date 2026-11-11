@@ -1,11 +1,9 @@
 package crawlingbot.discord;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import crawlingbot.discord.commands.SlashCommandFunctions;
-import crawlingbot.util.PropertyUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -19,7 +17,6 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
 @Slf4j
 public class DiscordBot extends ListenerAdapter {
-	private static String botToken = new String(Base64.decodeBase64(PropertyUtil.getProps("discord.botToken")));
 	private static JDA BOT;
 
 	private DiscordBot() {
@@ -34,12 +31,16 @@ public class DiscordBot extends ListenerAdapter {
 	}
 
 	public void buildingBot() throws InterruptedException {
-		if (StringUtils.isEmpty(botToken))
-			throw new IllegalStateException("Bot token is empty");
-		
-		BOT = JDABuilder.createDefault(botToken, GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT)
-				.disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOJI, CacheFlag.STICKER, CacheFlag.SCHEDULED_EVENTS)
-				.addEventListeners(getDiscordBot()).build().awaitReady();
+	    String botToken = System.getenv("DISCORD_BOT_TOKEN");
+	    if (StringUtils.isBlank(botToken)) {
+	        throw new IllegalStateException("DISCORD_BOT_TOKEN is not set");
+	    }
+
+	    BOT = JDABuilder.createDefault(
+	            botToken, GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT)
+	            .disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOJI,
+	                    CacheFlag.STICKER, CacheFlag.SCHEDULED_EVENTS)
+	            .addEventListeners(getDiscordBot()).build().awaitReady();
 	}
 
 	public void sendMessage(String channelId, String content) {
