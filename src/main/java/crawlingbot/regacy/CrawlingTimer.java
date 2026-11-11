@@ -15,7 +15,7 @@
 //        Timer timer = new Timer();
 //    	CrawlingHellDivers2Gal crawling = new CrawlingHellDivers2Gal();
 //    	SendMessage sendMessage = new SendMessage();
-//    	
+//
 //		// 1초 후에 시작하고, 매 5초마다 실행
 //		timer.scheduleAtFixedRate(new TimerTask() {
 //			@Override

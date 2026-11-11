@@ -5,7 +5,7 @@ import crawlingbot.discord.DiscordBot;
 import crawlingbot.domain.WebpageConfigs;
 
 public class Application {
-	
+
 	public static void main(String[] args) throws InterruptedException {
 		/*boot bot*/
 		DiscordBot.getDiscordBot().buildingBot();

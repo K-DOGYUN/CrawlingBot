@@ -31,42 +31,42 @@ public class DiscordBot extends ListenerAdapter {
 	}
 
 	public void buildingBot() throws InterruptedException {
-	    String botToken = System.getenv("DISCORD_BOT_TOKEN");
-	    if (StringUtils.isBlank(botToken)) {
-	        throw new IllegalStateException("DISCORD_BOT_TOKEN is not set");
-	    }
+		String botToken = System.getenv("DISCORD_BOT_TOKEN");
+		if (StringUtils.isBlank(botToken)) {
+			throw new IllegalStateException("DISCORD_BOT_TOKEN is not set");
+		}
 
-	    BOT = JDABuilder.createDefault(
-	            botToken, GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT)
-	            .disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOJI,
-	                    CacheFlag.STICKER, CacheFlag.SCHEDULED_EVENTS)
-	            .addEventListeners(getDiscordBot()).build().awaitReady();
+		BOT = JDABuilder.createDefault(
+				botToken, GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT)
+				.disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOJI,
+						CacheFlag.STICKER, CacheFlag.SCHEDULED_EVENTS)
+				.addEventListeners(getDiscordBot()).build().awaitReady();
 	}
 
 	public void sendMessage(String channelId, String content) {
 		if (StringUtils.isAnyEmpty(channelId, content))
 			throw new IllegalArgumentException("Channel ID and content must not be empty.");
-		
+
 		if (BOT.getTextChannelById(channelId) == null)
 			throw new NullPointerException("Channel with ID " + channelId + " does not exist.");
-		
+
 		BOT.getTextChannelById(channelId).sendMessage(content).queue(
-		        success -> log.info("Message sent to channel {}: {}", channelId, content),
-		        failure -> log.error("Failed to send message to channel {}: {}", channelId, failure.getMessage())
-	    );
+				success -> log.info("Message sent to channel {}: {}", channelId, content),
+				failure -> log.error("Failed to send message to channel {}: {}", channelId, failure.getMessage())
+		);
 	}
-	
+
 	public void sendMessage(String channelId, MessageEmbed embed) {
 		if (ObjectUtils.isEmpty(channelId) || ObjectUtils.isEmpty(embed))
 			throw new IllegalArgumentException("Channel ID and content must not be empty.");
-		
+
 		if (BOT.getTextChannelById(channelId) == null)
 			throw new NullPointerException("Channel with ID " + channelId + " does not exist.");
-		
+
 		BOT.getTextChannelById(channelId).sendMessageEmbeds(embed).queue(
-		        success -> log.info("Message sent to channel {}: {}", channelId, embed),
-		        failure -> log.error("Failed to send message to channel {}: {}", channelId, failure.getMessage())
-	    );
+				success -> log.info("Message sent to channel {}: {}", channelId, embed),
+				failure -> log.error("Failed to send message to channel {}: {}", channelId, failure.getMessage())
+		);
 	}
 
 	@Override
@@ -96,11 +96,11 @@ public class DiscordBot extends ListenerAdapter {
 	public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		syncedSlashCommandEvent(event);
 	}
-	
+
 	private synchronized void syncedSlashCommandEvent(SlashCommandInteractionEvent event) {
-		if (event == null) 
+		if (event == null)
 			throw new NullPointerException("There is no SlashCommandInteractionEvent");
-		
+
 		SlashCommandFunctions command = new SlashCommandFunctions();
 
 		switch (event.getSubcommandName()) {
